@@ -13,7 +13,7 @@ public class UserProfileEntity
     [Required, MaxLength(50)]
     public string LastName { get; set; } = null!;
 
-    public string ProfileImage { get; set; } = null!;
+    public string? ProfileImage { get; set; }
 
     public virtual UserEntity User { get; set; } = null!;
     public virtual UserAddressEntity Address { get; set; } = null!;

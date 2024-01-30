@@ -21,6 +21,6 @@ public class UserEntity
     public int RoleId { get; set; }
 
     public virtual UserRoleEntity Role { get; set; } = null!;
-    public virtual UserProfileEntity UserProfile { get; set; } = null!;
-    public virtual UserAuthenticationEntity UserAuthentication { get; set; } = null!;
+    public virtual UserProfileEntity? UserProfile { get; set; }
+    public virtual UserAuthenticationEntity? UserAuthentication { get; set; }
 }

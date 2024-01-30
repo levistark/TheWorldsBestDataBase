@@ -64,8 +64,8 @@ public class RoleRepository_Tests
     {
         // Arrange
         RoleRepository _roleRepository = new RoleRepository(_userDataContext);
-        var sampleEntity = CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity();
-        var newEntity = new UserRoleEntity() { RoleType = "Partner" };
+        await CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity();
+        var newEntity = new UserRoleEntity() { RoleId = 1, RoleType = "Partner" };
 
         // Act
         var result = await _roleRepository.UpdateAsync(x => x.RoleType == "Free", newEntity);
@@ -73,6 +73,21 @@ public class RoleRepository_Tests
         // Assert
         Assert.NotNull(result);
         Assert.True(result.RoleType == "Partner");
+    }
+
+    [Fact]
+    public async Task DeleteEntityShould_FindAndDeleteCorrectEntity_ThenReturnTrue()
+    {
+        // Arrange
+        RoleRepository _roleRepository = new RoleRepository(_userDataContext);
+        await CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity();
+        var entityToDelete = await _roleRepository.ReadOneAsync(x => x.RoleType == "Admin");
+
+        // Act
+        var result = await _roleRepository.DeleteAsync(x => x.RoleId == 1, entityToDelete);
+
+        // Assert
+        Assert.True(result);
 
     }
 }

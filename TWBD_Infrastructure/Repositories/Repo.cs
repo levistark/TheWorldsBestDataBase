@@ -79,9 +79,9 @@ public abstract class Repo<TEntity> where TEntity : class
         {
             var existingEntity = await _userDataContext.Set<TEntity>().FirstOrDefaultAsync(expression);
 
-            if (existingEntity != null)
+            if (existingEntity != null && existingEntity == entity)
             {
-                _userDataContext.Set<TEntity>().Remove(existingEntity); 
+                _userDataContext.Set<TEntity>().Remove(entity); 
                 await _userDataContext.SaveChangesAsync();
                 return true;
             }

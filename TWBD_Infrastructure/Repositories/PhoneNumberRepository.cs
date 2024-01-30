@@ -2,7 +2,7 @@
 using TWBD_Infrastructure.Entities;
 
 namespace TWBD_Infrastructure.Repositories;
-public class PhoneNumberRepository : Repo<UserRoleEntity>
+public class PhoneNumberRepository : Repo<UserPhoneNumberEntity>
 {
     private readonly UserDataContext _userDataContext;
     public PhoneNumberRepository (UserDataContext userDataContext) : base(userDataContext)

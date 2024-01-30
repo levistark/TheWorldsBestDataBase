@@ -22,5 +22,4 @@ public class UserDataContext(DbContextOptions<UserDataContext> options) : DbCont
             .Property(b => b.RegistrationDate)
             .HasDefaultValueSql("getdate()");
     }
-
 }

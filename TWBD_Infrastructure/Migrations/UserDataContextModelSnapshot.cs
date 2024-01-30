@@ -153,7 +153,6 @@ namespace TWBD_Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ProfileImage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
@@ -242,11 +241,9 @@ namespace TWBD_Infrastructure.Migrations
 
             modelBuilder.Entity("TWBD_Infrastructure.Entities.UserEntity", b =>
                 {
-                    b.Navigation("UserAuthentication")
-                        .IsRequired();
+                    b.Navigation("UserAuthentication");
 
-                    b.Navigation("UserProfile")
-                        .IsRequired();
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("TWBD_Infrastructure.Entities.UserPhoneNumberEntity", b =>
