@@ -45,9 +45,6 @@ namespace TWBD_Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("AddressId");
 
                     b.ToTable("Addresses");
@@ -110,27 +107,6 @@ namespace TWBD_Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TWBD_Infrastructure.Entities.UserPhoneNumberEntity", b =>
-                {
-                    b.Property<int>("PhoneId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PhoneId"));
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PhoneId");
-
-                    b.ToTable("PhoneNumbers");
-                });
-
             modelBuilder.Entity("TWBD_Infrastructure.Entities.UserProfileEntity", b =>
                 {
                     b.Property<int>("UserId")
@@ -149,7 +125,7 @@ namespace TWBD_Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PhoneNumberPhoneId")
+                    b.Property<int>("PhoneNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("ProfileImage")
@@ -158,8 +134,6 @@ namespace TWBD_Infrastructure.Migrations
                     b.HasKey("UserId");
 
                     b.HasIndex("AddressId");
-
-                    b.HasIndex("PhoneNumberPhoneId");
 
                     b.ToTable("Profiles");
                 });
@@ -215,12 +189,6 @@ namespace TWBD_Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TWBD_Infrastructure.Entities.UserPhoneNumberEntity", "PhoneNumber")
-                        .WithMany("UserProfiles")
-                        .HasForeignKey("PhoneNumberPhoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TWBD_Infrastructure.Entities.UserEntity", "User")
                         .WithOne("UserProfile")
                         .HasForeignKey("TWBD_Infrastructure.Entities.UserProfileEntity", "UserId")
@@ -228,8 +196,6 @@ namespace TWBD_Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Address");
-
-                    b.Navigation("PhoneNumber");
 
                     b.Navigation("User");
                 });
@@ -244,11 +210,6 @@ namespace TWBD_Infrastructure.Migrations
                     b.Navigation("UserAuthentication");
 
                     b.Navigation("UserProfile");
-                });
-
-            modelBuilder.Entity("TWBD_Infrastructure.Entities.UserPhoneNumberEntity", b =>
-                {
-                    b.Navigation("UserProfiles");
                 });
 
             modelBuilder.Entity("TWBD_Infrastructure.Entities.UserRoleEntity", b =>

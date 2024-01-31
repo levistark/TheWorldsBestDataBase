@@ -36,10 +36,9 @@ public class AddressRepository_Tests
         await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = 2, FirstName = "Stefan", LastName = "Svensson" });
         await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = 3, FirstName = "Richard", LastName = "Nikolausson" });
 
-        await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Helsingborg", StreetName = "Hjälmshultsgatan 11", PostalCode = "25431", UserId = 1});
-        await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Skogsrundan 31", PostalCode = "25431", UserId = 2 });
-        await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Högaholmsgatan 3", PostalCode = "57632", UserId = 3 });
-
+        await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Helsingborg", StreetName = "Hjälmshultsgatan 11", PostalCode = "25431"});
+        await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Skogsrundan 31", PostalCode = "25431"});
+        await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Högaholmsgatan 3", PostalCode = "57632"});
 
         // Act
         var result = await _addressRepository.ReadAllAsync();
@@ -59,7 +58,6 @@ public class AddressRepository_Tests
             City = "Stockholm",
             StreetName = "Sveavägen 1",
             PostalCode = "12345",
-            UserId = 1
         };
 
         // Act
@@ -67,7 +65,6 @@ public class AddressRepository_Tests
 
         // Assert
         Assert.NotNull(result);
-        Assert.False(result.UserProfiles.Any());
         Assert.True(result.StreetName == address.StreetName);
     }
 
@@ -104,11 +101,11 @@ public class AddressRepository_Tests
     {
         // Arrange
         await AddSampleDataShould_AddDataToTables_ReturnWithAddressList();
-        var existingAddress = await _addressRepository.ReadOneAsync(x => x.UserId == 1);
+        var existingAddress = await _addressRepository.ReadOneAsync(x => x.AddressId == 1);
 
         // Act
         existingAddress.PostalCode = "25432";
-        var result = await _addressRepository.UpdateAsync(x => x.UserId == 1, existingAddress);
+        var result = await _addressRepository.UpdateAsync(x => x.AddressId == 1, existingAddress);
         var addressList = await _addressRepository.ReadAllAsync();
 
         // Assert
@@ -122,7 +119,7 @@ public class AddressRepository_Tests
     {
         // Arrange
         await AddSampleDataShould_AddDataToTables_ReturnWithAddressList();
-        var entityToDelete = await _addressRepository.ReadOneAsync(a => a.UserId == 1);
+        var entityToDelete = await _addressRepository.ReadOneAsync(a => a.AddressId == 1);
 
         // Act
         var result = await _addressRepository.DeleteAsync(x => x.PostalCode == "25431", entityToDelete);

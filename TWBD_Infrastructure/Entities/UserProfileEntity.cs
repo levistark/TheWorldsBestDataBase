@@ -13,9 +13,14 @@ public class UserProfileEntity
     [Required, MaxLength(50)]
     public string LastName { get; set; } = null!;
 
+    public int PhoneNumber { get; set; }
+
+    [Required]
+    [ForeignKey(nameof(UserAddressEntity))]
+    public int AddressId { get; set; }
+
     public string? ProfileImage { get; set; }
 
     public virtual UserEntity User { get; set; } = null!;
     public virtual UserAddressEntity Address { get; set; } = null!;
-    public virtual UserPhoneNumberEntity PhoneNumber { get; set; } = null!;
 }

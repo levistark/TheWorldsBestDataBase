@@ -16,9 +16,5 @@ public class UserAddressEntity
     [Required, MaxLength(50)]
     public string PostalCode { get; set; } = null!;
 
-    [Required, ForeignKey(nameof(UserProfileEntity))]
-    public int UserId { get; set; }
-
     public virtual ICollection<UserProfileEntity> UserProfiles { get; set; } = new HashSet<UserProfileEntity>();
-
 }

@@ -10,8 +10,6 @@ public class UserDataContext(DbContextOptions<UserDataContext> options) : DbCont
     public virtual DbSet<UserAuthenticationEntity> Authentications { get; set; }
     public virtual DbSet<UserProfileEntity> Profiles { get; set; }
     public virtual DbSet<UserAddressEntity> Addresses { get; set; }
-    public virtual DbSet<UserPhoneNumberEntity> PhoneNumbers { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserEntity>()
