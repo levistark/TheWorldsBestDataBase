@@ -13,7 +13,8 @@ public class UserProfileEntity
     [Required, MaxLength(50)]
     public string LastName { get; set; } = null!;
 
-    public int PhoneNumber { get; set; }
+    [MaxLength(50)]
+    public string? PhoneNumber { get; set; }
 
     [Required]
     [ForeignKey(nameof(UserAddressEntity))]

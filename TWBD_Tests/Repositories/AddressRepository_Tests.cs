@@ -17,25 +17,8 @@ public class AddressRepository_Tests
     private readonly AddressRepository _addressRepository = new(_userDataContext);
 
     [Fact]
-    public async Task<IEnumerable<UserAddressEntity>> AddSampleDataShould_AddDataToTables_ReturnWithAddressList()
+    public async Task AddSampleDataShould_AddDataToTables_ReturnWithAddressList()
     {
-        // Arrange
-        await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "Admin" });
-        await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
-        await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "Manager" });
-
-        var user1 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
-        var user2 = await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
-        var user3 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 3 });
-
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user3.UserId, Email = "singer@singer.com", PasswordHash = "111", PasswordSalt = "222" });
-
-        await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = 1, FirstName = "Levi", LastName = "Stark" });
-        await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = 2, FirstName = "Stefan", LastName = "Svensson" });
-        await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = 3, FirstName = "Richard", LastName = "Nikolausson" });
-
         await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Helsingborg", StreetName = "Hjälmshultsgatan 11", PostalCode = "25431"});
         await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Skogsrundan 31", PostalCode = "25431"});
         await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Högaholmsgatan 3", PostalCode = "57632"});
@@ -46,7 +29,6 @@ public class AddressRepository_Tests
         // Assert
         Assert.NotNull(result);
         Assert.True(result.Count() > 2);
-        return result;
     }
 
     [Fact]
@@ -129,5 +111,18 @@ public class AddressRepository_Tests
         Assert.True(result);
         Assert.True(!addressList.Any(b => b.City == "Helsingborg"));
         Assert.True(addressList.Count() == 2);
+    }
+
+    [Fact]
+    public async Task ExistingShould_CheckIfEntityExists_ThenReturnTrueIfItExists()
+    {
+        // Arrange
+        await AddSampleDataShould_AddDataToTables_ReturnWithAddressList();
+
+        // Act
+        var entity = await _addressRepository.Existing(a => a.AddressId == 1);
+
+        // Assert
+        Assert.True(entity);
     }
 }

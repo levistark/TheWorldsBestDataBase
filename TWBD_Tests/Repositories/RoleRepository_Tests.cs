@@ -90,4 +90,18 @@ public class RoleRepository_Tests
         Assert.True(result);
 
     }
+
+    [Fact]
+    public async Task ExistingShould_CheckIfEntityExists_ThenReturnTrueIfItExists()
+    {
+        // Arrange
+        RoleRepository _roleRepository = new RoleRepository(_userDataContext);
+        await CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity();
+
+        // Act
+        var entity = await _roleRepository.Existing(a => a.RoleType == "Free");
+
+        // Assert
+        Assert.True(entity);
+    }
 }

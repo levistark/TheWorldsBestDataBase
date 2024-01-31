@@ -136,4 +136,26 @@ public class AuthenticationRepository_Tests
         Assert.True(result);
         Assert.True(uaList.Count() == 1);
     }
+
+    [Fact]
+    public async Task ExistingShould_CheckIfEntityExists_ThenReturnTrueIfItExists()
+    {
+        // Arrange
+        RoleRepository _roleRepository = new RoleRepository(_userDataContext);
+        UserRepository _userRepository = new UserRepository(_userDataContext);
+        AuthenticationRepository _uaRepository = new AuthenticationRepository(_userDataContext);
+
+        await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "Admin" });
+        await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
+        var user1 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
+        var user2 = await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
+
+        // Act
+        var entity = await _uaRepository.Existing(a => a.Email == "asd@asd.com");
+
+        // Assert
+        Assert.True(entity);
+    }
 }

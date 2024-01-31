@@ -24,11 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TWBD_Domain\TWBD_Domain.csproj" />
     <ProjectReference Include="..\TWBD_Infrastructure\TWBD_Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

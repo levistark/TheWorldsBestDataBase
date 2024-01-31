@@ -115,4 +115,22 @@ public class UserRepository_Tests
         Assert.True(result);
         Assert.True(userList.Count() == 1);
     }
+
+    [Fact]
+    public async Task ExistingShould_CheckIfEntityExists_ThenReturnTrueIfItExists()
+    {
+        // Arrange
+        RoleRepository _roleRepository = new RoleRepository(_userDataContext);
+        UserRepository _userRepository = new UserRepository(_userDataContext);
+        await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "Admin" });
+        await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
+        await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
+        await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
+
+        // Act
+        var entity = await _userRepository.Existing(a => a.UserId == 1);
+
+        // Assert
+        Assert.True(entity);
+    }
 }

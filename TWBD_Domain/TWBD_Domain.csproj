@@ -8,7 +8,14 @@
 
   <ItemGroup>
     <Folder Include="Resources\" />
-    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TWBD_Infrastructure\TWBD_Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

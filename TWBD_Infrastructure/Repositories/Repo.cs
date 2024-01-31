@@ -21,7 +21,6 @@ public abstract class Repo<TEntity> where TEntity : class
             var result = await _userDataContext.Set<TEntity>().AddAsync(entity);
             await _userDataContext.SaveChangesAsync();
 
-
             if (result.Entity == entity)
             {
                 return result.Entity;
@@ -85,6 +84,16 @@ public abstract class Repo<TEntity> where TEntity : class
                 await _userDataContext.SaveChangesAsync();
                 return true;
             }
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return false;
+    }
+
+    public virtual async Task<bool> Existing(Expression<Func<TEntity, bool>> expression)
+    {
+        try
+        {
+            return await _userDataContext.Set<TEntity>().AnyAsync(expression);
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return false;
