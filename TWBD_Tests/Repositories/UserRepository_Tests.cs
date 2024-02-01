@@ -108,7 +108,7 @@ public class UserRepository_Tests
         var entityToDelete = await _userRepository.ReadOneAsync(x => x.UserId == 1);
 
         // Act
-        var result = await _userRepository.DeleteAsync(x => x.UserId == 2, entityToDelete);
+        var result = await _userRepository.DeleteAsync(x => x.UserId == entityToDelete.UserId, entityToDelete);
         var userList = await _userRepository.ReadAllAsync();
 
         // Assert

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
+using TWBD_Domain.DTOs.Enums;
 using TWBD_Domain.DTOs.Responses;
 using TWBD_Infrastructure.Migrations;
 using TWBD_Infrastructure.Repositories;
@@ -9,7 +10,7 @@ public class UserValidationService(AuthenticationRepository authenticationReposi
 {
     private readonly AuthenticationRepository _authenticationRepository = authenticationRepository;
 
-    public AuthenticationResponse ValidatePassword(string password)
+    public ValidationResponse ValidatePassword(string password)
     {
         try
         {
@@ -18,16 +19,15 @@ public class UserValidationService(AuthenticationRepository authenticationReposi
             // If password criteria not met:
             if (regex.IsMatch(password))
             {
-                return new AuthenticationResponse() { Success = true };
+                return new ValidationResponse() { Success = true };
             }
             else
-                return new AuthenticationResponse() { Code = AuthenticationCode.INVALID_PASSWORD, Success = false };
+                return new ValidationResponse() { Code = ValidationCode.INVALID_PASSWORD, Success = false };
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-        return new AuthenticationResponse();
+        return new ValidationResponse();
     }
-
-    public async Task<AuthenticationResponse> ValidateEmail(string email)
+    public async Task<ValidationResponse> ValidateEmail(string email)
     {
         try
         {
@@ -35,32 +35,41 @@ public class UserValidationService(AuthenticationRepository authenticationReposi
 
             // Does the email match the criteria?
             if (!regex.IsMatch(email))
-                return new AuthenticationResponse() { Code = AuthenticationCode.INVALID_EMAIL };
+                return new ValidationResponse() { Code = ValidationCode.INVALID_EMAIL };
 
             // Does the user exist?
             if (await _authenticationRepository.Existing(x => x.Email == email))
-                return new AuthenticationResponse() { Code = AuthenticationCode.ALREADY_EXISTS };
+                return new ValidationResponse() { Code = ValidationCode.ALREADY_EXISTS };
 
-            return new AuthenticationResponse() { Success = true };
+            return new ValidationResponse() { Success = true };
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-        return new AuthenticationResponse() { Code = AuthenticationCode.FAILED };
+        return new ValidationResponse() { Code = ValidationCode.FAILED };
     }
-    public AuthenticationResponse ValidateUpdatePassword(string newPassword, string oldPassword)
+    public ValidationResponse ValidateUpdatePassword(string newPassword, string oldPassword)
     {
         try
         {
             // Is the password the same as the old password?
             if (newPassword == oldPassword)
-                return new AuthenticationResponse() { Code = AuthenticationCode.ALREADY_EXISTS };
+                return new ValidationResponse() { Code = ValidationCode.ALREADY_EXISTS };
 
             if (!ValidatePassword(newPassword).Success)
-                return new AuthenticationResponse() { Code = AuthenticationCode.INVALID_PASSWORD };
+                return new ValidationResponse() { Code = ValidationCode.INVALID_PASSWORD };
 
-            return new AuthenticationResponse() { Success = true };
+            return new ValidationResponse() { Success = true };
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-        return new AuthenticationResponse();
+        return new ValidationResponse();
     }
-
+    public ValidationResponse ValidateMatchingPassword(string password, string passwordConfirm)
+    {
+        try
+        {
+            if (password == passwordConfirm)
+                return new ValidationResponse() { Success = true };
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return new ValidationResponse() { Code = ValidationCode.PASSWORD_NOT_MATCH};
+    }
 }

@@ -11,7 +11,7 @@ public class RoleRepository_Tests
             .UseInMemoryDatabase($"{Guid.NewGuid()}").Options);
 
     [Fact]
-    public async Task CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity()
+    public async Task<UserRoleEntity> CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity()
     {
         // Arrange
         RoleRepository _roleRepository = new RoleRepository(_userDataContext);
@@ -26,6 +26,7 @@ public class RoleRepository_Tests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(result.RoleType, roleEntity.RoleType);
+        return result;
     }
 
     [Fact]
@@ -80,15 +81,16 @@ public class RoleRepository_Tests
     {
         // Arrange
         RoleRepository _roleRepository = new RoleRepository(_userDataContext);
-        await CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity();
-        var entityToDelete = await _roleRepository.ReadOneAsync(x => x.RoleType == "Admin");
+        var sampleEntity = await CreateEntityShould_CreateNewEntity_ThenReturnWithCreatedEntity();
+        var entityToDelete = await _roleRepository.ReadOneAsync(x => x.RoleType == "Free");
 
         // Act
-        var result = await _roleRepository.DeleteAsync(x => x.RoleId == 1, entityToDelete);
+        var result = await _roleRepository.DeleteAsync(x => x.RoleId == entityToDelete.RoleId, entityToDelete);
+        var roleList = await _roleRepository.ReadAllAsync();
 
         // Assert
         Assert.True(result);
-
+        Assert.True(roleList.Count() == 0);
     }
 
     [Fact]

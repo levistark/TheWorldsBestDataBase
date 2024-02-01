@@ -1,58 +1,90 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics;
 using TWBD_Domain.DTOs;
+using TWBD_Domain.DTOs.Enums;
+using TWBD_Domain.DTOs.Responses;
+using TWBD_Infrastructure.Entities;
+using TWBD_Infrastructure.Repositories;
 
 namespace TWBD_Domain.Services;
 public class UserRegisterService
 {
+    private readonly UserAddressService _addressService;
+    private readonly UserRepository _userRepository;
+    private readonly AuthenticationRepository _authenticationRepository;
+    private readonly ProfileRepository _profileRepository;
+    private readonly UserRoleService _userRoleService;
+    private readonly UserSecurityService _userSecurityService;
 
-    //public void RegisterUser(UserRegistrationModel newUser)
-    //{
-    //    // validate
-    //    if (_context.Users.Any(x => x.Username == model.Username))
-    //        throw new AppException("Username '" + model.Username + "' is already taken");
+    public UserRegisterService
+        (UserRepository userRepository, 
+        UserAddressService addressService, 
+        AuthenticationRepository authenticationRepository, 
+        ProfileRepository profileRepository,
+        UserRoleService userRoleService,
+        UserSecurityService userSecurityService)
+    {
+        _addressService = addressService;
+        _userRepository = userRepository;
+        _authenticationRepository = authenticationRepository;
+        _profileRepository = profileRepository;
+        _userRoleService = userRoleService;
+        _userSecurityService = userSecurityService;
+    }
 
-    //    // map model to new user object
-    //    var user = _mapper.Map<User>(model);
+    public async Task<ServiceResponse> RegisterUser(UserRegistrationModel user)
+    {
+        try
+        {
+            var newUser = await _userRepository.CreateAsync(new UserEntity()
+            {
+                RoleId = await _userRoleService.GetRoleId(user.Role)
+            });
 
-    //    // hash password
-    //    user.PasswordHash = BCrypt.HashPassword(model.Password);
+            if (newUser != null) 
+            {
+                var newUserAuth = await _authenticationRepository.CreateAsync(new UserAuthenticationEntity()
+                {
+                    UserId = newUser.UserId,
+                    Email = user.Email,
+                    PasswordHash = _userSecurityService.GenerateSecurePassword(user.Password)
+                });
 
-    //    // save user
-    //    _context.Users.Add(user);
-    //    _context.SaveChanges();
-    //}
+                if (newUserAuth != null)
+                {
+                    var newUserProfile = await _profileRepository.CreateAsync(new UserProfileEntity()
+                    {
+                        UserId = newUser.UserId,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        AddressId = await _addressService.GetAddressId(new AddressModel()
+                        {
+                            City = user.City,
+                            StreetName = user.StreetName,
+                            PostalCode = user.PostalCode,
+                        })
+                    });
 
-    //public void Update(int id, UpdateRequest model)
-    //{
-    //    var user = getUser(id);
-
-    //    // validate
-    //    if (model.Username != user.Username && _context.Users.Any(x => x.Username == model.Username))
-    //        throw new AppException("Username '" + model.Username + "' is already taken");
-
-    //    // hash password if it was entered
-    //    if (!string.IsNullOrEmpty(model.Password))
-    //        user.PasswordHash = BCrypt.HashPassword(model.Password);
-
-    //    // copy model to user and save
-    //    _mapper.Map(model, user);
-    //    _context.Users.Update(user);
-    //    _context.SaveChanges();
-    //}
-
-    //public void Delete(int id)
-    //{
-    //    var user = getUser(id);
-    //    _context.Users.Remove(user);
-    //    _context.SaveChanges();
-    //}
-
-    //// helper methods
-
-    //private User getUser(int id)
-    //{
-    //    var user = _context.Users.Find(id);
-    //    if (user == null) throw new KeyNotFoundException("User not found");
-    //    return user;
-    //}
+                    if (newUserProfile != null)
+                    {
+                        return new ServiceResponse()
+                        {
+                            Success = true,
+                            Code = ServiceCode.CREATED,
+                            ReturnObject = new UserModel()
+                            {
+                                UserId = newUser.UserId,
+                                FirstName = newUserProfile.FirstName,
+                                LastName = newUserProfile.LastName,
+                                Email = newUserAuth.Email,
+                                PhoneNumber = newUserProfile.PhoneNumber, 
+                                Role = await _userRoleService.GetRoleType(newUser.RoleId)
+                            }
+                        };
+                    }
+                }
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return new ServiceResponse();
+    }
 }

@@ -17,7 +17,7 @@ public class ProfileRepository_Tests
     private readonly AddressRepository _addressRepository = new(_userDataContext);
 
     [Fact]
-    public async Task<IEnumerable<UserEntity>> AddSampleDataShould_AddDataToTables_ReturnWithUserList()
+    public async Task<IEnumerable<UserProfileEntity>> AddSampleDataShould_AddDataToTables_ReturnWithUserList()
     {
         // Arrange
         await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "Admin" });
@@ -32,15 +32,15 @@ public class ProfileRepository_Tests
         var address2 = await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Skogsrundan 31", PostalCode = "25431" });
         var address3 = await _addressRepository.CreateAsync(new UserAddressEntity() { City = "Sävsjö", StreetName = "Högaholmsgatan 3", PostalCode = "57632" });
 
-        await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = user1.UserId, FirstName = "Levi", LastName = "Stark", AddressId = address1.AddressId});
-        await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = user2.UserId, FirstName = "Adelina", LastName = "Claesson", AddressId = address2.AddressId });
+        await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = 1, FirstName = "Levi", LastName = "Stark", AddressId = address1.AddressId});
+        await _profileRepository.CreateAsync(new UserProfileEntity() { UserId = 2, FirstName = "Adelina", LastName = "Claesson", AddressId = address2.AddressId });
 
         // Act
-        var result = await _userRepository.ReadAllAsync();
+        var result = await _profileRepository.ReadAllAsync();
 
         // Assert
         Assert.NotNull(result);
-        Assert.True(result.Count() > 2);
+        Assert.True(result.Count() == 2);
         return result;
     }
 
@@ -99,11 +99,10 @@ public class ProfileRepository_Tests
     {
         // Arrange
         await AddSampleDataShould_AddDataToTables_ReturnWithUserList();
-
-        var newUserProfile = new UserProfileEntity() { UserId = 1, FirstName = "Psalm" };
+        var newUserProfile = new UserProfileEntity() { UserId = 1, FirstName = "Psalm", AddressId = 1 };
 
         // Act
-        var result = await _profileRepository.UpdateAsync(x => x.UserId == 1, newUserProfile);
+        var result = await _profileRepository.UpdateAsync(x => x.UserId == newUserProfile.UserId, newUserProfile);
         var profileList = await _profileRepository.ReadAllAsync();
 
         // Assert

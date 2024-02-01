@@ -15,9 +15,6 @@ public class UserAuthenticationEntity
     public string Email { get; set; } = null!;
 
     [Required]
-    public string PasswordSalt { get; set; } = null!;
-
-    [Required]
     public string PasswordHash { get; set; } = null!;
 
     public virtual UserEntity User { get; set; } = null!;

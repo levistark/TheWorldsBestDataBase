@@ -23,8 +23,8 @@ public class UserValidationService_Tests
         await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
         await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
         await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = 1, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = 2, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = 1, Email = "asd@asd.com", PasswordHash = "123" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = 2, Email = "dsa@dsa.com", PasswordHash = "321" });
     }
 
     [Fact]
@@ -143,5 +143,19 @@ public class UserValidationService_Tests
         // Assert
         Assert.NotNull(result);
         Assert.False(result.Success);
+    }
+
+    [Fact]
+    public void ValidateMatchingPasswordShould_CheckIfPasswordsAreMatching_ThenReturnTrue()
+    {
+        // Arrange
+        string password = "password";
+        string passwordConfirm = "password";
+
+        // Act
+        var result = _service.ValidateMatchingPassword(password, passwordConfirm);
+
+        // Assert
+        Assert.True(result.Success);
     }
 }

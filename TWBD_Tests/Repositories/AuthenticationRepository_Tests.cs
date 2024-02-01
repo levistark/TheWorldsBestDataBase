@@ -27,12 +27,10 @@ public class AuthenticationRepository_Tests
             UserId = user.UserId,
             Email = "asd@asd.com",
             PasswordHash = "123",
-            PasswordSalt = "123",
         });
 
         // Assert
         Assert.NotNull(result);
-        Assert.True(result.PasswordSalt == "123");
         Assert.True(result.UserId == user.UserId);
     }
 
@@ -49,8 +47,8 @@ public class AuthenticationRepository_Tests
         await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
         var user1 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
         var user2 = await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321" });
 
         // Act
         var result = await _uaRepository.ReadOneAsync(x => x.UserId == user1.UserId);
@@ -73,8 +71,8 @@ public class AuthenticationRepository_Tests
         await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
         var user1 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
         var user2 = await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321" });
 
         // Act
         var result = await _uaRepository.ReadAllAsync();
@@ -96,10 +94,10 @@ public class AuthenticationRepository_Tests
         await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
         var user1 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
         var user2 = await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321" });
 
-        var newUserAuthentications = new UserAuthenticationEntity() { UserId = user1.UserId, Email = "levi@domain.com", PasswordHash = "2", PasswordSalt = "1" };
+        var newUserAuthentications = new UserAuthenticationEntity() { UserId = user1.UserId, Email = "levi@domain.com", PasswordHash = "2" };
 
         // Act
         var result = await _uaRepository.UpdateAsync(x => x.UserId == 1, newUserAuthentications);
@@ -123,8 +121,8 @@ public class AuthenticationRepository_Tests
         await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
         var user1 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
         var user2 = await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321" });
 
         var entityToDelete = await _uaRepository.ReadOneAsync(x => x.UserId == 1);
 
@@ -149,8 +147,8 @@ public class AuthenticationRepository_Tests
         await _roleRepository.CreateAsync(new UserRoleEntity() { RoleType = "User" });
         var user1 = await _userRepository.CreateAsync(new UserEntity() { IsActive = true, RoleId = 1 });
         var user2 = await _userRepository.CreateAsync(new UserEntity() { IsActive = false, RoleId = 2 });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123", PasswordSalt = "123" });
-        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321", PasswordSalt = "321" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user1.UserId, Email = "asd@asd.com", PasswordHash = "123" });
+        await _uaRepository.CreateAsync(new UserAuthenticationEntity() { UserId = user2.UserId, Email = "dsa@dsa.com", PasswordHash = "321" });
 
         // Act
         var entity = await _uaRepository.Existing(a => a.Email == "asd@asd.com");
