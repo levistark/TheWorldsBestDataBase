@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TWBD_Domain.DTOs;
+using TWBD_Domain.DTOs.Models;
 using TWBD_Domain.Services;
 using TWBD_Infrastructure.Contexts;
 using TWBD_Infrastructure.Entities;

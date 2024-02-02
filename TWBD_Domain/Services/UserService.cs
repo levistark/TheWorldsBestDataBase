@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using TWBD_Domain.DTOs;
 using TWBD_Domain.DTOs.Enums;
+using TWBD_Domain.DTOs.Models;
 using TWBD_Domain.DTOs.Responses;
 using TWBD_Infrastructure.Entities;
 using TWBD_Infrastructure.Repositories;

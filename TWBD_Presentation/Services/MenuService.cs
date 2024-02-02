@@ -1,6 +1,18 @@
-﻿namespace TWBD_Presentation.Services;
+﻿using TWBD_Domain.DTOs.Models;
+using TWBD_Domain.Services;
+
+namespace TWBD_Presentation.Services;
 internal class MenuService
 {
+    private readonly UserService _userService;
+    private readonly UserLoginService _loginService;
+
+    public MenuService(UserService userService, UserLoginService loginService)
+    {
+        _userService = userService;
+        _loginService = loginService;
+    }
+
     /// <summary>
     /// Nedan följer metoder som är till för att "förkorta" vissa Console.-metoder för att göra koden lite mer clean. 
     /// </summary>
@@ -18,13 +30,12 @@ internal class MenuService
         Blank();
         WriteLine("Press any key to continue.");
         Console.ReadKey();
-        StartMenu();
     }
     
     /// <summary>
     /// Alla menyer och vyer nedan
     /// </summary>
-    public void StartMenu()
+    public async Task StartMenu()
     {
         Header("LOGIN / CREATE ACCOUNT");
 
@@ -39,7 +50,7 @@ internal class MenuService
             switch (option)
             {
                 case "1":
-                    LoginMenu();
+                    await LoginMenu();
                     return;
                 case "2":
                     SignupMenu();
@@ -51,9 +62,15 @@ internal class MenuService
                     break;
             }
         }
-
     }
-    public void LoginMenu()
+
+    private async Task<bool> LoginHandler(string email, string password)
+    {
+        var result = await _loginService.LoginValidation(new LoginModel(email, password));
+        return result.Success;
+    }
+
+    public async Task LoginMenu()
     {
         Header("LOGIN");
 
@@ -64,6 +81,18 @@ internal class MenuService
         Write("Enter your passwrod: ");
         var passwordEntry = Console.ReadLine();
         while (passwordEntry == "") { passwordEntry = Console.ReadLine(); }
+
+        var validLogin = await LoginHandler(emailEntry!, passwordEntry!);
+
+        if (validLogin)
+            await UserDashBoard(emailEntry!);
+        else
+        {
+            Blank();
+            WriteLine("Login failed. Please try again or create a new user account.");
+            PressAnyKey();
+            await StartMenu();
+        }
     }
     public void SignupMenu()
     {
@@ -111,5 +140,44 @@ internal class MenuService
             WriteLine("Passwords do not match, try again");
             passwordConfirmEntry = Console.ReadLine();
         }
+    }
+
+    public async Task UserDashBoard(string email)
+    {
+        Header("USER DASHBOARD");
+
+        WriteLine("1. All Users ");
+        WriteLine("2. My profile");
+        WriteLine("3. Log out");
+
+        // 1. Hämta upp korrekt profilinformation baserat på email
+        var userProfile = await _userService.GetUserProfileByEmail(email);
+        UserProfileModel? myProfile = userProfile.ReturnObject as UserProfileModel;
+
+        var option = Console.ReadLine();
+
+        while (true)
+        {
+            switch (option)
+            {
+                case "1":
+                    await LoginMenu();
+                    return;
+                case "2":
+                    await MyProfile(myProfile!.UserId);
+                    return;
+                case "3":
+                    await StartMenu();
+                    return;
+                default:
+                    option = Console.ReadLine();
+                    break;
+            }
+        }
+    }
+
+    public async Task MyProfile(int id)
+    {
+
     }
 }

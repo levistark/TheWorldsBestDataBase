@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using TWBD_Domain.DTOs;
+using TWBD_Domain.DTOs.Models;
 using TWBD_Domain.Interfaces;
 using TWBD_Infrastructure.Contexts;
 using TWBD_Infrastructure.Entities;
