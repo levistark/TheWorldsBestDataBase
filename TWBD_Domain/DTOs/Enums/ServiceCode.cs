@@ -12,4 +12,5 @@ public enum ServiceCode
     FAILED = 7,
     PASSWORD_NOT_MATCH = 8,
     NULL_VALUES = 9,
+    DELETED = 10,
 }

@@ -41,4 +41,27 @@ public class UserRepository : Repo<UserEntity>
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
+
+    // Update
+    public override async Task<UserEntity> UpdateAsync(Expression<Func<UserEntity, bool>> expression, UserEntity entity)
+    {
+        try
+        {
+            var existingEntity = await _userDataContext.Users
+                .Include(i => i.UserAuthentication)
+                .Include(i => i.Role)
+                .Include(i => i.UserProfile)
+                .ThenInclude(i => i!.Address)
+                .FirstOrDefaultAsync(expression);
+
+            if (existingEntity != null)
+            {
+                _userDataContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+                await _userDataContext.SaveChangesAsync();
+                return existingEntity;
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return null!;
+    }
 }
