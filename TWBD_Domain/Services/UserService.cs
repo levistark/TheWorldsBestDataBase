@@ -86,11 +86,17 @@ public class UserService
 
                     if (newUserProfile != null)
                     {
-                        return new ServiceResponse()
+                        var createdProfile = await GetUserProfileByEmail(user.Email);
+
+                        if (createdProfile.ReturnObject is UserProfileModel profile)
                         {
-                            Success = true,
-                            Code = ServiceCode.CREATED,
-                        };
+                            return new ServiceResponse()
+                            {
+                                Success = true,
+                                Code = ServiceCode.CREATED,
+                                ReturnObject = profile
+                            };
+                        }
                     }
                 }
             }
@@ -393,4 +399,37 @@ public class UserService
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return new ServiceResponse();
     }
+
+    public async Task<ServiceResponse> ValidateEmail(string email)
+    {
+        try
+        {
+            // Validate user email
+            var emailValid = await _validation.ValidateEmail(email);
+
+            // Return error codes if invalid
+            if (emailValid.Code == ValidationCode.ALREADY_EXISTS) return new ServiceResponse() { Code = ServiceCode.ALREADY_EXISTS };
+            if (emailValid.Code == ValidationCode.INVALID_EMAIL) return new ServiceResponse() { Code = ServiceCode.INVALID_EMAIL };
+
+            else return new ServiceResponse() { Success = true };
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return new ServiceResponse();
+    }
+
+    public  ServiceResponse ValidatePassword(string password)
+    {
+        try
+        {
+            // Validate user password
+            var passwordValid = _validation.ValidatePassword(password);
+
+            // Return error codes if invalid
+            if (passwordValid.Code == ValidationCode.INVALID_PASSWORD) return new ServiceResponse() { Code = ServiceCode.INVALID_PASSWORD };
+            else return new ServiceResponse() { Success = true };
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return new ServiceResponse();
+    }
+
 }
