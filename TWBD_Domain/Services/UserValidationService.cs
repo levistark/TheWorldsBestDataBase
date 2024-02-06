@@ -46,6 +46,23 @@ public class UserValidationService(AuthenticationRepository authenticationReposi
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return new ValidationResponse() { Code = ValidationCode.FAILED };
     }
+
+    public ValidationResponse ValidateJustEmail(string email)
+    {
+        try
+        {
+            var regex = new Regex("^[\\w!#$%&'*+\\-/=?\\^_`{|}~]+(\\.[\\w!#$%&'*+\\-/=?\\^_`{|}~]+)*@((([\\-\\w]+\\.)+[a-zA-Z]{2,4})|(([0-9]{1,3}\\.){3}[0-9]{1,3}))\\z");
+
+            // Does the email match the criteria?
+            if (!regex.IsMatch(email))
+                return new ValidationResponse() { Code = ValidationCode.INVALID_EMAIL };
+            else
+                return new ValidationResponse() { Success = true };
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return new ValidationResponse() { Code = ValidationCode.FAILED };
+    }
+
     public ValidationResponse ValidateUpdatePassword(string newPassword, string oldPassword)
     {
         try

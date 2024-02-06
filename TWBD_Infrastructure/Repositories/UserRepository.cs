@@ -20,6 +20,7 @@ public class UserRepository : Repo<UserEntity>
                 .Include(i => i.UserAuthentication)
                 .Include(i => i.Role)
                 .Include(i => i.UserProfile)
+                .ThenInclude(i => i!.Address)
                 .ToListAsync();
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
@@ -34,6 +35,7 @@ public class UserRepository : Repo<UserEntity>
                 .Include(i => i.UserAuthentication)
                 .Include(i => i.Role)
                 .Include(i => i.UserProfile)
+                .ThenInclude(i => i!.Address)
                 .FirstOrDefaultAsync(predicate)!;
             if (existingEntity != null)
                 return existingEntity;

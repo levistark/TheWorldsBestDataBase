@@ -1,4 +1,5 @@
 ﻿using TWBD_Domain.DTOs.Models;
+using TWBD_Domain.DTOs.Enums;
 using TWBD_Domain.Services;
 
 namespace TWBD_Presentation.Services;
@@ -76,30 +77,38 @@ internal class MenuService
     {
         Header("LOGIN");
 
+        WriteLine("Enter your login credentials below, or enter in 'q' to go back");
+        Blank();
+
         Write("Enter your email address: ");
         var emailEntry = Console.ReadLine();
         while (emailEntry == "") { emailEntry = Console.ReadLine(); }
+
+        if (emailEntry == "q")
+            await StartMenu();
 
         Write("Enter your password: ");
         var passwordEntry = Console.ReadLine();
         while (passwordEntry == "") { passwordEntry = Console.ReadLine(); }
 
-        var validLogin = await LoginHandler(emailEntry!, passwordEntry!);
-
-        if (validLogin)
+        if (passwordEntry == "q")
         {
-            Console.Clear();
-            await UserDashBoard(emailEntry!);
-            Console.WriteLine("loading...");
-            Thread.Sleep(300);
-        }
-            
+            await StartMenu();
+            return;
+        } 
         else
         {
-            Blank();
-            WriteLine("Login failed. Please try again or create a new user account.");
-            PressAnyKey();
-            await StartMenu();
+            if (await LoginHandler(emailEntry!, passwordEntry!))
+            {
+                await UserDashBoard(emailEntry!);
+            }
+            else
+            {
+                Blank();
+                WriteLine("Login failed. Please try again or create a new user account.");
+                PressAnyKey();
+                await StartMenu();
+            }
         }
     }
     public async Task SignupMenu()
@@ -116,6 +125,8 @@ internal class MenuService
             WriteLine("No null values allowed.");
             firstNameEntry = Console.ReadLine(); 
         }
+        if (firstNameEntry == "q")
+            await StartMenu();
         
         Write("Last name: ");
         var lastNameEntry = Console.ReadLine();
@@ -124,6 +135,8 @@ internal class MenuService
             WriteLine("No null values allowed.");
             lastNameEntry = Console.ReadLine(); 
         }
+        if (lastNameEntry == "q")
+            await StartMenu();
 
         Write("Email: ");
         var emailEntry = Console.ReadLine();
@@ -132,11 +145,16 @@ internal class MenuService
             WriteLine("No null values allowed.");
             emailEntry = Console.ReadLine(); 
         }
+        if (emailEntry == "q")
+            await StartMenu();
 
         var emailValidationResult = await _userService.ValidateEmail(emailEntry!);
 
         while (!emailValidationResult.Success)
         {
+            if (emailEntry == "q")
+                await StartMenu();
+
             if (emailValidationResult.Code == TWBD_Domain.DTOs.Enums.ServiceCode.ALREADY_EXISTS)
             {
                 WriteLine("This email address is already registered with us. Please enter another email, or login with your existing email.");
@@ -149,13 +167,11 @@ internal class MenuService
             emailValidationResult = await _userService.ValidateEmail(emailEntry!);
         }
 
+
         Write("Phone number: ");
         var phoneEntry = Console.ReadLine();
-        while (phoneEntry == "")
-        {
-            WriteLine("No null values allowed.");
-            phoneEntry = Console.ReadLine(); 
-        }
+        if (phoneEntry == "q")
+            await StartMenu();
 
         Write("City: ");
         var cityEntry = Console.ReadLine();
@@ -164,6 +180,8 @@ internal class MenuService
             WriteLine("No null values allowed.");
             cityEntry = Console.ReadLine(); 
         }
+        if (cityEntry == "q")
+            await StartMenu();
 
         Write("Street Name: ");
         var streetEntry = Console.ReadLine();
@@ -172,6 +190,8 @@ internal class MenuService
             WriteLine("No null values allowed.");
             streetEntry = Console.ReadLine(); 
         }
+        if (streetEntry == "q")
+            await StartMenu();
 
         Write("Postal code: ");
         var postalCodeEntry = Console.ReadLine();
@@ -180,6 +200,8 @@ internal class MenuService
             WriteLine("No null values allowed.");
             postalCodeEntry = Console.ReadLine();
         }
+        if (postalCodeEntry == "q")
+            await StartMenu();
 
 
         Write("Password: ");
@@ -189,6 +211,9 @@ internal class MenuService
             WriteLine("No null values allowed.");
             passwordEntry = Console.ReadLine(); 
         }
+        if (passwordEntry == "q")
+            await StartMenu();
+
         var passwordValidationResult = _userService.ValidatePassword(passwordEntry!);
 
         while (!passwordValidationResult.Success)
@@ -200,6 +225,10 @@ internal class MenuService
 
         Write("Confirm password: ");
         var passwordConfirmEntry = Console.ReadLine();
+
+        if (passwordConfirmEntry == "q")
+            await StartMenu();
+
         while (passwordConfirmEntry != passwordEntry)
         {
             WriteLine("Passwords do not match, try again");
@@ -213,13 +242,15 @@ internal class MenuService
             WriteLine("No null values allowed.");
             roleEntry = Console.ReadLine();
         }
+        if (roleEntry == "q")
+            await StartMenu();
 
         var registrationResult = await _userService.RegisterUser(new UserRegistrationModel()
         {
             FirstName = firstNameEntry!,
             LastName = lastNameEntry!,
             Email = emailEntry!,
-            PhoneNumber = phoneEntry!,
+            PhoneNumber = phoneEntry,
             Password = passwordEntry!,
             PasswordConfirm = passwordConfirmEntry!,
             City = cityEntry!,
@@ -232,14 +263,14 @@ internal class MenuService
         {
             Console.Clear();
             WriteLine("User was successfully registered. Redirecting to user dashboard");
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             await UserDashBoard(profile.Email);
         }
         else
         {
             Console.Clear();
             WriteLine("User could not be registered due to an internal error. Please try again");
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             await SignupMenu();
         }
     }
@@ -249,32 +280,40 @@ internal class MenuService
 
         var userProfile = await _userService.GetUserProfileByEmail(email);
 
-        WriteLine("1. All Users ");
-        WriteLine("2. My profile");
-        WriteLine("3. Log out");
-
-        UserProfileModel? myProfile = userProfile.ReturnObject as UserProfileModel;
-
-        var option = Console.ReadLine();
-
-        while (true)
+        if (userProfile.ReturnObject is UserProfileModel myProfile)
         {
-            switch (option)
+
+            WriteLine("1. All Users ");
+            WriteLine("2. My profile");
+            WriteLine("3. Log out");
+            var option = Console.ReadLine();
+
+            while (true)
             {
-                case "1":
-                    await AllUsers(email);
-                    return;
-                case "2":
-                    await MyProfile(myProfile!.UserId);
-                    return;
-                case "3":
-                    await StartMenu();
-                    return;
-                default:
-                    option = Console.ReadLine();
-                    break;
+                switch (option)
+                {
+                    case "1":
+                        await AllUsers(email);
+                        return;
+                    case "2":
+                        await MyProfile(myProfile!.UserId);
+                        return;
+                    case "3":
+                        await StartMenu();
+                        return;
+                    default:
+                        option = Console.ReadLine();
+                        break;
+                }
             }
         }
+        else
+        {
+            WriteLine("User does either not have a profile or registered authentication credentials. Please create a new user account.");
+            PressAnyKey();
+            await StartMenu();
+        }
+        
     }
     public async Task AllUsers(string email)
     {
@@ -339,18 +378,18 @@ internal class MenuService
         {
             UserProfileModel? profile = result.ReturnObject as UserProfileModel;
 
-            Write($"User Id: {profile!.UserId}");
-            Write($"First Name: {profile!.FirstName}");
-            Write($"Last Name: {profile!.LastName}");
-            Write($"Email: {profile!.Email}");
-            Write($"Role: {profile!.Role}");
-            Write($"Phone Number: {profile!.PhoneNumber}");
+            WriteLine($"User Id: {profile!.UserId}");
+            WriteLine($"First Name: {profile!.FirstName}");
+            WriteLine($"Last Name: {profile!.LastName}");
+            WriteLine($"Email: {profile!.Email}");
+            WriteLine($"Role: {profile!.Role}");
+            WriteLine($"Phone Number: {profile!.PhoneNumber}");
             Blank();
 
             WriteLine("Address Info");
-            Write($"City: {profile!.City}");
-            Write($"Street Name: {profile!.StreetName}");
-            Write($"Postal Code: {profile!.PostalCode}");
+            WriteLine($"City: {profile!.City}");
+            WriteLine($"Street Name: {profile!.StreetName}");
+            WriteLine($"Postal Code: {profile!.PostalCode}");
             Blank();
 
             WriteLine("Press 1 to edit info, press 2 to go back to all users, or press 3 to delete this user.");
@@ -388,18 +427,18 @@ internal class MenuService
                 case "y":
                     var result = await _userService.DeleteUserProfileById(id);
                     
-                    if (result.Code == TWBD_Domain.DTOs.Enums.ServiceCode.DELETED)
+                    if (result.Code == ServiceCode.DELETED)
                     {
                         Console.Clear();
                         WriteLine("User was successfully removed.");
-                        Thread.Sleep(1000);
+                        Thread.Sleep(2000);
                         await AllUsers(email);
                     }
                     else
                     {
                         Console.Clear();
                         WriteLine("User could not be removed due to an internal error.");
-                        Thread.Sleep(1000);
+                        Thread.Sleep(2000);
                         await AllUsers(email);
                     }
                     return;
@@ -468,18 +507,18 @@ internal class MenuService
         {
             UserProfileModel? profile = result.ReturnObject as UserProfileModel;
 
-            Write($"1: User Id: {profile!.UserId}");
-            Write($"2: First Name: {profile!.FirstName}");
-            Write($"3: Last Name: {profile!.LastName}");
-            Write($"4: Email: {profile!.Email}");
-            Write($"5: Role: {profile!.Role}");
-            Write($"6: Phone Number: {profile!.PhoneNumber}");
+            WriteLine($"1: User Id: {profile!.UserId}");
+            WriteLine($"2: First Name: {profile!.FirstName}");
+            WriteLine($"3: Last Name: {profile!.LastName}");
+            WriteLine($"4: Email: {profile!.Email}");
+            WriteLine($"5: Role: {profile!.Role}");
+            WriteLine($"6: Phone Number: {profile!.PhoneNumber}");
             Blank();
 
             WriteLine("Address Info");
-            Write($"7: City: {profile!.City}");
-            Write($"8: Street Name: {profile!.StreetName}");
-            Write($"9: Postal Code: {profile!.PostalCode}");
+            WriteLine($"7: City: {profile!.City}");
+            WriteLine($"8: Street Name: {profile!.StreetName}");
+            WriteLine($"9: Postal Code: {profile!.PostalCode}");
             Blank();
 
             WriteLine("Enter the desired field number you wish to edit, or press 'q' to go back to your profile.");
@@ -503,7 +542,7 @@ internal class MenuService
                         await EditProfileField(3, id, pageIndex);
                         return;
                     case "4":
-                        WriteLine("You can't edit your emaila address. To change email address, delete your user profile and create a new user account with your new email");
+                        WriteLine("You can't edit email address. To change email address, delete your user profile and create a new user account with your new email");
                         option = Console.ReadLine();
                         break;
                     case "5":
@@ -548,25 +587,25 @@ internal class MenuService
         {
             case 2:
                 existingProfile!.FirstName = newValue!;
-                return;
+                break;
             case 3:
                 existingProfile!.LastName = newValue!;
-                return;
+                break;
             case 5:
                 existingProfile!.Role = newValue!;
-                return;
+                break;
             case 6:
                 existingProfile!.PhoneNumber = newValue!;
-                return;
+                break;
             case 7:
                 existingProfile!.City = newValue!;
-                return;
+                break;
             case 8:
                 existingProfile!.StreetName = newValue!;
-                return;
+                break;
             case 9:
                 existingProfile!.PostalCode = newValue!;
-                return;
+                break;
         }
 
         var updateResult = await _userService.UpdateUserProfile(existingProfile!);
@@ -575,20 +614,25 @@ internal class MenuService
         {
             Console.Clear();
             WriteLine("User profile was successfully updated.");
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
+
+            if (pageIndex == 1)
+                await MyProfile(id);
+
+            if (pageIndex == 2)
+                await UserProfileDetails(id);
         }
         else
         {
             Console.Clear();
             WriteLine("Property was not updated due to an internal error. Please try again");
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
+
+            if (pageIndex == 1)
+                await MyProfile(id);
+
+            if (pageIndex == 2)
+                await UserProfileDetails(id);
         }
-
-        if (pageIndex == 1)
-            await MyProfile(id);
-
-        if (pageIndex == 2)
-            await UserProfileDetails(id);
     }
-
 }

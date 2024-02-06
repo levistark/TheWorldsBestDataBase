@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using TWBD_Domain.DTOs.Enums;
 using TWBD_Domain.DTOs.Models;
 using TWBD_Domain.DTOs.Responses;
@@ -34,7 +35,11 @@ public class UserService
         _addressService = addressService;
     }
 
-    // Register new user
+    /// <summary>
+    /// Registeres a new user in the db, including user profile, authentications, address and role
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns>ServiceResponse with ReturnObject as a UserProfileModel</returns>
     public async Task<ServiceResponse> RegisterUser(UserRegistrationModel user)
     {
         try
@@ -76,6 +81,7 @@ public class UserService
                         UserId = newUser.UserId,
                         FirstName = user.FirstName,
                         LastName = user.LastName,
+                        PhoneNumber = user.PhoneNumber,
                         AddressId = await _addressService.GetAddressId(new AddressModel()
                         {
                             City = user.City,
@@ -105,6 +111,11 @@ public class UserService
         return new ServiceResponse();
     }
 
+    /// <summary>
+    /// Retrieves a user profile with given email address from db
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> GetUserProfileById(int id)
     {
         try
@@ -139,7 +150,12 @@ public class UserService
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return new ServiceResponse();
     }
-
+    
+    /// <summary>
+    /// Retrieves a user profile with given UserId from db
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
     public async Task<ServiceResponse> GetUserProfileByEmail(string email)
     {
         try
@@ -149,7 +165,7 @@ public class UserService
 
             var entity = await _userRepository.ReadOneAsync(u => u.UserAuthentication!.Email == email);
 
-            if (entity.UserProfile != null && entity.UserAuthentication != null)
+            if (entity != null && entity.UserAuthentication != null)
             {
                 return new ServiceResponse()
                 {
@@ -175,6 +191,10 @@ public class UserService
         return new ServiceResponse();
     }
 
+    /// <summary>
+    /// Retrieves all user profiles in the db
+    /// </summary>
+    /// <returns>ServiceResponse with ReturnObject as list of UserProfileModel</returns>
     public async Task<ServiceResponse> GetAllUserProfiles()
     {
         try
@@ -217,84 +237,80 @@ public class UserService
         return new ServiceResponse();
     }
 
+    /// <summary>
+    /// Updates a userprofile with properties of a new given UserProfileModel
+    /// </summary>
+    /// <param name="profileModel"></param>
+    /// <returns>ServiceResponse code</returns>
     public async Task<ServiceResponse> UpdateUserProfile(UserProfileModel profileModel)
     {
         try
         {
-            // Validate user email 
-            var emailValid = await _validation.ValidateEmail(profileModel.Email);
+            // Validate string fields
+            if (string.IsNullOrEmpty(profileModel.FirstName) || string.IsNullOrEmpty(profileModel.FirstName) || string.IsNullOrEmpty(profileModel.City) || string.IsNullOrEmpty(profileModel.StreetName) || string.IsNullOrEmpty(profileModel.PostalCode) || string.IsNullOrEmpty(profileModel.Role))
+                return new ServiceResponse() { Code = ServiceCode.NULL_VALUES };
 
-            // Return error codes if invalid
-            if (emailValid.Code == ValidationCode.ALREADY_EXISTS) return new ServiceResponse() { Code = ServiceCode.ALREADY_EXISTS };
-            if (emailValid.Code == ValidationCode.INVALID_EMAIL) return new ServiceResponse() { Code = ServiceCode.INVALID_EMAIL };
+            var userToBeUpdated = await _userRepository.ReadOneAsync(u => u.UserId == profileModel.UserId);
 
-            if (emailValid.Success)
+            // Update user entity
+            var updatedUser = await _userRepository.UpdateAsync(u => u.UserId == profileModel.UserId, new UserEntity()
             {
-                // Validate string fields
-                if (string.IsNullOrEmpty(profileModel.FirstName) || string.IsNullOrEmpty(profileModel.FirstName) || string.IsNullOrEmpty(profileModel.City) || string.IsNullOrEmpty(profileModel.StreetName) || string.IsNullOrEmpty(profileModel.PostalCode) || string.IsNullOrEmpty(profileModel.Role))
-                    return new ServiceResponse() { Code = ServiceCode.NULL_VALUES };
+                UserId = profileModel.UserId,
+                RoleId = await _userRoleService.GetRoleId(profileModel.Role)
+            });
 
-                var userToBeUpdated = await _userRepository.ReadOneAsync(u => u.UserId == profileModel.UserId);
-
-                // Update user entity
-                var updatedUser = await _userRepository.UpdateAsync(u => u.UserId == profileModel.UserId, new UserEntity()
+            if (updatedUser == null || userToBeUpdated.UserAuthentication == null)
+            {
+                return new ServiceResponse() { Message = "updatedUser = null" };
+            }
+            else
+            {
+                // Update user authentication entity
+                var updatedUserAuth = await _authenticationRepository.UpdateAsync(u => u.UserId == profileModel.UserId, new UserAuthenticationEntity()
                 {
                     UserId = profileModel.UserId,
-                    RoleId = await _userRoleService.GetRoleId(profileModel.Role)
+                    Email = profileModel.Email,
+
+                    // Not updating password this way (keeping it the same as before)
+                    PasswordHash = userToBeUpdated.UserAuthentication.PasswordHash
                 });
 
-                if (updatedUser == null || userToBeUpdated.UserAuthentication == null)
+                if (updatedUserAuth == null || userToBeUpdated.UserProfile == null)
                 {
-                    return new ServiceResponse() { Message = "updatedUser = null" };
+                    return new ServiceResponse() { Message = "updatedUserAuth = null" };
                 }
                 else
                 {
-                    // Update user authentication entity
-                    var updatedUserAuth = await _authenticationRepository.UpdateAsync(u => u.UserId == profileModel.UserId, new UserAuthenticationEntity()
+                    // Update user profile entity
+                    var updatedUserProfile = await _profileRepository.UpdateAsync(u => u.UserId == profileModel.UserId, new UserProfileEntity()
                     {
                         UserId = profileModel.UserId,
-                        Email = profileModel.Email,
-
-                        // Not updating password this way (keeping it the same as before)
-                        PasswordHash = userToBeUpdated.UserAuthentication.PasswordHash
+                        FirstName = profileModel.FirstName,
+                        LastName = profileModel.LastName,
+                        PhoneNumber = profileModel.PhoneNumber,
+                        AddressId = await _addressService.GetAddressId(new AddressModel()
+                        {
+                            City = profileModel.City,
+                            StreetName = profileModel.StreetName,
+                            PostalCode = profileModel.PostalCode,
+                        })
                     });
 
-                    if (updatedUserAuth == null || userToBeUpdated.UserProfile == null)
+                    if (updatedUserProfile == null)
                     {
-                        return new ServiceResponse() { Message = "updatedUserAuth = null" };
+                        return new ServiceResponse() { Message = "updatedUserProfile = null" };
                     }
                     else
                     {
-                        // Update user profile entity
-                        var updatedUserProfile = await _profileRepository.UpdateAsync(u => u.UserId == profileModel.UserId, new UserProfileEntity()
-                        {
-                            UserId = profileModel.UserId,
-                            FirstName = profileModel.FirstName,
-                            LastName = profileModel.LastName,
-                            AddressId = await _addressService.GetAddressId(new AddressModel()
-                            {
-                                City = profileModel.City,
-                                StreetName = profileModel.StreetName,
-                                PostalCode = profileModel.PostalCode,
-                            })
-                        });
+                        var updatedUserFromDb = await _userRepository.ReadOneAsync(u => u.UserId == profileModel.UserId);
 
-                        if (updatedUserProfile == null)
+                        if (updatedUserFromDb.UserProfile!.FirstName == profileModel.FirstName)
                         {
-                            return new ServiceResponse() { Message = "updatedUserProfile = null" };
-                        }
-                        else
-                        {
-                            var updatedUserFromDb = await _userRepository.ReadOneAsync(u => u.UserId == profileModel.UserId);
-
-                            if (updatedUserFromDb.UserProfile!.FirstName == profileModel.FirstName)
+                            return new ServiceResponse()
                             {
-                                return new ServiceResponse()
-                                {
-                                    Success = true,
-                                    Code = ServiceCode.UPDATED,
-                                };
-                            }
+                                Success = true,
+                                Code = ServiceCode.UPDATED,
+                            };
                         }
                     }
                 }
@@ -336,16 +352,29 @@ public class UserService
         return new ServiceResponse();
     }
 
+    /// <summary>
+    /// Deletes user profile and user authentications with given user id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns>ServiceResponse code</returns>
     public async Task<ServiceResponse> DeleteUserProfileById(int id)
     {
         try
         {
             var profileToDelete = await _profileRepository.ReadOneAsync(u => u.UserId == id);
+            var authenticationTodelete = await _authenticationRepository.ReadOneAsync(u => u.UserId == id);
 
             if (profileToDelete != null)
             {
+                // Delete profile
                 if (await _profileRepository.DeleteAsync(u => u.UserId == id, profileToDelete))
-                    return new ServiceResponse { Success = true, Code = ServiceCode.DELETED};
+                {
+                    // Cascade delete user auth
+                    if (await _authenticationRepository.DeleteAsync(a => a.UserId == id, authenticationTodelete))
+                    {
+                        return new ServiceResponse { Success = true, Code = ServiceCode.DELETED };
+                    }
+                }
             }
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
@@ -400,6 +429,11 @@ public class UserService
         return new ServiceResponse();
     }
 
+    /// <summary>
+    /// Validates an email address against a Regex, as well as checking the db for duplicates
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns>ServiceResponse code</returns>
     public async Task<ServiceResponse> ValidateEmail(string email)
     {
         try
@@ -417,6 +451,11 @@ public class UserService
         return new ServiceResponse();
     }
 
+    /// <summary>
+    /// Validates a password against a Regex
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public  ServiceResponse ValidatePassword(string password)
     {
         try

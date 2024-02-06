@@ -13,5 +13,5 @@ public class UserRoleEntity
     [StringLength(50)]
     public string RoleType { get; set; } = null!;
 
-    public virtual ICollection<UserEntity> Users { get; set; } = new HashSet<UserEntity>();
+    public virtual ICollection<UserEntity> Users { get; set; } = new List<UserEntity>();
 }

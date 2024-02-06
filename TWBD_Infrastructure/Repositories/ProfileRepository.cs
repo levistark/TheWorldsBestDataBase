@@ -12,6 +12,7 @@ public class ProfileRepository : Repo<UserProfileEntity>
     {
         _userDataContext = userDataContext;
     }
+
     public override async Task<IEnumerable<UserProfileEntity>> ReadAllAsync()
     {
         try

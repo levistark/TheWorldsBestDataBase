@@ -21,7 +21,7 @@ internal class Program
             services.AddScoped<ProfileRepository>();
             services.AddScoped<AddressRepository>();
 
-            services.AddSingleton<MenuService>();
+            services.AddScoped<MenuService>();
             services.AddScoped<UserService>();
             services.AddScoped<UserAddressService>();
             services.AddScoped<UserRoleService>();
