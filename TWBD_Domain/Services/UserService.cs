@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using TWBD_Domain.DTOs.Enums;
 using TWBD_Domain.DTOs.Models;
 using TWBD_Domain.DTOs.Responses;
@@ -173,7 +172,7 @@ public class UserService
                     ReturnObject = new UserProfileModel()
                     {
                         UserId = entity.UserId,
-                        FirstName = entity.UserProfile.FirstName,
+                        FirstName = entity.UserProfile!.FirstName,
                         LastName = entity.UserProfile.LastName,
                         Email = entity.UserAuthentication.Email,
                         PhoneNumber = entity.UserProfile.PhoneNumber,

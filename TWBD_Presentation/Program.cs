@@ -14,6 +14,7 @@ internal class Program
         var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
         {
             services.AddDbContext<UserDataContext>(x => x.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\VSProjects\Datalagring\TheWorldsBestDataBase\TWBD_Infrastructure\Data\users_db.mdf;Integrated Security=True;Connect Timeout=30"));
+            services.AddDbContext<ProductDataContext>(x => x.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\VSProjects\Datalagring\TheWorldsBestDataBase\TWBD_Infrastructure\Data\products_db.mdf;Integrated Security=True;Connect Timeout=30;Encrypt=True"));
 
             services.AddScoped<RoleRepository>();
             services.AddScoped<UserRepository>();

@@ -5,7 +5,7 @@ using TWBD_Infrastructure.Contexts;
 using TWBD_Infrastructure.Entities;
 
 namespace TWBD_Infrastructure.Repositories;
-public class UserRepository : Repo<UserEntity>
+public class UserRepository : UserRepo<UserEntity>
 {
     private readonly UserDataContext _userDataContext;
     public UserRepository(UserDataContext userDataContext) : base(userDataContext)

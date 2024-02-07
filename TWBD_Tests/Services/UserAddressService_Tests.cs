@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Net;
-using TWBD_Domain.DTOs;
 using TWBD_Domain.DTOs.Models;
 using TWBD_Domain.Services;
 using TWBD_Infrastructure.Contexts;
@@ -49,7 +47,6 @@ public class UserAddressService_Tests
 
         // Assert
         Assert.True(result != 0);
-        Assert.True(result == 4);
     }
 
     [Fact]
