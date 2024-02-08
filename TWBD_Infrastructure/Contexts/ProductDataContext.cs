@@ -65,7 +65,7 @@ public partial class ProductDataContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
             entity.HasOne(d => d.ArticleNumberNavigation).WithMany(p => p.ProductDescriptions)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__ProductDe__Artic__7755B73D");
 
             entity.HasOne(d => d.Language).WithMany(p => p.ProductDescriptions)
@@ -78,7 +78,7 @@ public partial class ProductDataContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__ProductR__3214EC07A82048DD");
 
             entity.HasOne(d => d.ArticleNumberNavigation).WithMany(p => p.ProductReviews)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__ProductRe__Artic__74794A92");
         });
 

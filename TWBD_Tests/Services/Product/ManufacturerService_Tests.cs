@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TWBD_Domain.DTOs.Models.Product;
 using TWBD_Domain.Services.ProductServices;
 using TWBD_Infrastructure.Contexts;
 using TWBD_Infrastructure.Entities;
@@ -46,5 +47,51 @@ public class ManufacturerService_Tests
 
         // Assert
         Assert.True(result == "Apple");
+    }
+
+    [Fact]
+    public async Task GetAllManufacturersShould_RetrieveAll_ThenReturnAsModelList()
+    { 
+        // Arrange
+        ManufacturerService _manufacturerService = new ManufacturerService(_manufacturerRepository);
+        AddSampleData();
+
+        // Act
+        var result = await _manufacturerService.GetAllManufacturers();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Count() == 3);
+    }
+
+    [Fact]
+    public async Task UpdateManufacturerShould_UpdateManufacturer_ThenReturnWithItAsModel()
+    {
+        // Arrange
+        ManufacturerService _manufacturerService = new ManufacturerService(_manufacturerRepository);
+        AddSampleData();
+
+        // Act
+        var result = await _manufacturerService.UpdateManufacturer(new ManufacturerModel(1, "Apples"));
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Manufacturer == "Apples");
+    }
+
+    [Fact]
+    public async Task DeleteManufacturerByIdShould_DeleteManufacturerWithGiveId_ThenReturnTrue()
+    {
+        // Arrange
+        ManufacturerService _manufacturerService = new ManufacturerService(_manufacturerRepository);
+        AddSampleData();
+
+        // Act
+        var result = await _manufacturerService.DeleteManufacturerById(1);
+        var manufacturerList = await _manufacturerService.GetAllManufacturers();
+
+        // Assert
+        Assert.True(result);
+        Assert.True(manufacturerList.Count() == 2);
     }
 }

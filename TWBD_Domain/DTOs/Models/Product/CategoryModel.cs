@@ -5,5 +5,5 @@ public class CategoryModel
 {
     public int Id { get; set; }
     public string Category { get; set; } = null!;
-    public int? ParentCategory { get; set; }
+    public string? ParentCategory { get; set; }
 }

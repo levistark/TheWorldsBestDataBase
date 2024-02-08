@@ -15,7 +15,7 @@ public partial class ProductCategoryEntity
     [StringLength(50)]
     public string Category { get; set; } = null!;
 
-    public int? ParentCategory { get; set; }
+    public int? ParentCategory { get; set; } = 0;
 
     [InverseProperty("ProductCategory")]
     public virtual ICollection<ProductEntity> Products { get; set; } = new List<ProductEntity>();

@@ -7,6 +7,7 @@ public class ProductRegistrationModel
     public string Description { get; set; } = null!;
     public string DescriptionLanguage { get; set; } = null!;
     public decimal Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
     public string Category { get; set; } = null!;
     public string? ParentCategory { get; set; }
 }

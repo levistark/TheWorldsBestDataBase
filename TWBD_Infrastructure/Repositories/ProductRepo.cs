@@ -77,7 +77,7 @@ public abstract class ProductRepo<TEntity> where TEntity : class
         try
         {
             var existingEntity = await _productDataContext.Set<TEntity>().FirstOrDefaultAsync(expression);
-
+            
             if (existingEntity != null && existingEntity == entity)
             {
                 _productDataContext.Set<TEntity>().Remove(entity);
