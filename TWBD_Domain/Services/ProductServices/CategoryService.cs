@@ -33,12 +33,15 @@ public class CategoryService
                     ParentCategory = await GetCategoryId(category.ParentCategory!)
                 });
 
-                return new CategoryModel()
+                if (addedCategory != null)
                 {
-                    Id = addedCategory.Id,
-                    Category = addedCategory.Category,
-                    ParentCategory = await GetCategoryName(addedCategory.ParentCategory!)
-                };
+                    return new CategoryModel()
+                    {
+                        Id = addedCategory.Id,
+                        Category = addedCategory.Category,
+                        ParentCategory = await GetCategoryName(addedCategory.ParentCategory!)
+                    };
+                }
             }
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
@@ -154,31 +157,55 @@ public class CategoryService
     /// </summary>
     /// <param name="category">The name of the related category</param>
     /// <returns>The category's id</returns>
-    public async Task<int> GetCategoryId(string category)
+    public async Task<int?> GetCategoryId(string category)
     {
         try
         {
-            var categoryId = await _categoryRepository.ReadOneAsync(c => c.Category == category);
+            var categoryEntity = await _categoryRepository.ReadOneAsync(c => c.Category == category.ToLower());
 
             // Return existing category id
-            if (categoryId != null)
-                return categoryId.Id;
+            if (categoryEntity != null)
+                return categoryEntity.Id;
 
             // Create new category if it does not exists
             else
             {
                 var newCategory = await _categoryRepository.CreateAsync(new ProductCategoryEntity() 
                 { 
-                    Category = category,
+                    Category = category.ToLower(),
+                });
+
+                 if (newCategory != null) return newCategory.Id;
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return null!;
+    }
+    public async Task<int?> GetCategoryId(string category, int parentCategoryId)
+    {
+        try
+        {
+            var categoryEntity = await _categoryRepository.ReadOneAsync(c => c.Category == category.ToLower());
+
+            // Return existing category id
+            if (categoryEntity != null)
+                return categoryEntity.Id;
+
+            // Create new category if it does not exists
+            else
+            {
+                var newCategory = await _categoryRepository.CreateAsync(new ProductCategoryEntity()
+                {
+                    Category = category.ToLower(),
+                    ParentCategory = parentCategoryId 
                 });
 
                 if (newCategory != null) return newCategory.Id;
             }
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-        return 0;
+        return null!;
     }
-
     public async Task<string> GetCategoryName(int? id)
     {
         try
@@ -187,6 +214,20 @@ public class CategoryService
 
             if (category != null)
                 return category.Category;
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return null!;
+    }
+
+    public async Task<string> GetParentCategoryName(int id)
+    {
+        try
+        {
+            var category = await _categoryRepository.ReadOneAsync(c => c.Id == id);
+            var parentCategory = await GetCategoryName(category.ParentCategory);
+
+            if (parentCategory != null)
+                return parentCategory;
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;

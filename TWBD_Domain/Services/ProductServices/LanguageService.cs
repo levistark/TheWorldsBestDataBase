@@ -22,7 +22,7 @@ public class LanguageService
     {
         try
         {
-            var languageId = await _languageRepository.ReadOneAsync(l => l.Language == language);
+            var languageId = await _languageRepository.ReadOneAsync(l => l.Language == language.ToLower());
 
             // Return existing category id
             if (languageId != null)
@@ -31,7 +31,7 @@ public class LanguageService
             // Create new category if it does not exists
             else
             {
-                var newLanguage = await _languageRepository.CreateAsync(new LanguageEntity() { Language = language });
+                var newLanguage = await _languageRepository.CreateAsync(new LanguageEntity() { Language = language.ToLower() });
                 if (newLanguage != null) return newLanguage.Id;
             }
         }

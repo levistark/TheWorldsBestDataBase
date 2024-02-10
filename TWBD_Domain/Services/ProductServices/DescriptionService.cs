@@ -16,7 +16,28 @@ public class DescriptionService
         _descriptionRepository = descriptionRepository;
         _languageService = languageService;
     }
+    public async Task<DescriptionModel> GetDescriptionById(int id)
+    {
+        try
+        {
+            var description = await _descriptionRepository.ReadOneAsync(x => x.Id == id);
 
+            if (description != null)
+            {
+                return new DescriptionModel()
+                {
+                    Id = id,
+                    Description = description.Description,
+                    Specifications = description.Specifications,
+                    Ingress = description.Ingress,
+                    Language = await _languageService.GetLanguageName(description.LanguageId),
+                    ArticleNumber = description.ArticleNumber,
+                };
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return null!;
+    }
     public async Task<DescriptionModel> CreateDescription(DescriptionModel description)
     {
         try
@@ -45,7 +66,6 @@ public class DescriptionService
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     public async Task<List<DescriptionModel>> GetAllDescriptions()
     {
         try
@@ -71,7 +91,6 @@ public class DescriptionService
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     public async Task<List<DescriptionModel>> GetDescriptionsByProperty(Func<ProductDescriptionEntity, bool> predicate)
     {
         try

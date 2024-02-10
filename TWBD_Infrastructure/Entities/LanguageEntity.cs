@@ -12,6 +12,7 @@ public partial class LanguageEntity
     [Key]
     public int Id { get; set; }
 
+    [Column("LanguageType")]
     [StringLength(20)]
     [Unicode(false)]
     public string Language { get; set; } = null!;

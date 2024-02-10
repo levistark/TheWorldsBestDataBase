@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TWBD_Domain.Services;
+using TWBD_Domain.Services.ProductServices;
 using TWBD_Infrastructure.Contexts;
 using TWBD_Infrastructure.Repositories;
 using TWBD_Presentation.Services;
@@ -22,7 +23,15 @@ internal class Program
             services.AddScoped<ProfileRepository>();
             services.AddScoped<AddressRepository>();
 
+            services.AddScoped<LanguageRepository>();
+            services.AddScoped<ManufacturerRepository>();
+            services.AddScoped<ProductCategoryRepository>();
+            services.AddScoped<ProductRepository>();
+            services.AddScoped<ProductDescriptionRepository>();
+            services.AddScoped<ProductReviewRepository>();
+
             services.AddScoped<MenuService>();
+
             services.AddScoped<UserService>();
             services.AddScoped<UserAddressService>();
             services.AddScoped<UserRoleService>();
@@ -30,9 +39,17 @@ internal class Program
             services.AddScoped<UserValidationService>();
             services.AddScoped<UserLoginService>();
 
+            services.AddScoped<LanguageService>();
+            services.AddScoped<ManufacturerService>();
+            services.AddScoped<CategoryService>();
+            services.AddScoped<ProductService>();
+            services.AddScoped<DescriptionService>();
+            services.AddScoped<ReviewService>();
+            services.AddScoped<ProductValidationService>();
+
             services.AddLogging(builder =>
             {
-                builder.AddFilter("Microsoft", LogLevel.Warning);
+                builder.AddFilter("Microsoft", LogLevel.Error);
                 builder.AddFilter("System", LogLevel.Error);
             });
 

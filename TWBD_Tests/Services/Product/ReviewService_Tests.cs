@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TWBD_Domain.DTOs.Models.Product;
 using TWBD_Domain.Services.ProductServices;
 using TWBD_Infrastructure.Contexts;
 using TWBD_Infrastructure.Entities;
@@ -59,6 +60,47 @@ public class ReviewService_Tests
         Assert.True(reviewList.Count() == 2);
 
         return review1.Id;
+    }
+
+    [Fact]
+    public async Task CreateReviewShould_AddNewReviewToDb_ThenReturnItAsModel()
+    {
+        // Arrange
+        ReviewService _reviewService = new ReviewService(_reviewRepository);
+        await AddSampleData();
+
+        // Act
+        var result = await _reviewService.CreateReview(new ReviewModel()
+        {
+            Review = "SÄMST",
+            Rating = 0,
+            Author = "KUNDEN",
+            ArticleNumber = "A1"
+        });
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Author == "KUNDEN");
+    }
+
+    [Fact]
+    public async Task CreateReviewShould_AddNewBadReviewToDb_ThenReturnNull()
+    {
+        // Arrange
+        ReviewService _reviewService = new ReviewService(_reviewRepository);
+        await AddSampleData();
+
+        // Act
+        var result = await _reviewService.CreateReview(new ReviewModel()
+        {
+            Review = "SÄMST",
+            Rating = 0,
+            Author = "Levi",
+            ArticleNumber = "A1"
+        });
+
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]

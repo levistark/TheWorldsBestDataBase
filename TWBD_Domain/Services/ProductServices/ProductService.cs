@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿ using System.Diagnostics;
 using TWBD_Domain.DTOs.Models.Product;
 using TWBD_Domain.DTOs.Responses;
 using TWBD_Infrastructure.Entities;
@@ -50,40 +50,58 @@ public class ProductService
     {
         try
         {
-            var productEntity = await _productRepository.CreateAsync(new ProductEntity()
-            {
-                ArticleNumber = product.ArticleNumber,
-                Title = product.Title,
-                Price = product.Price,
-                DiscountPrice = product.DiscountPrice,
-                ManufacturerId = await _manufacturerService.GetManufacturerId(product.Manufacturer),
-                ProductCategoryId = await _categoryService.GetCategoryId(product.Category),
-            });
 
-            if (productEntity != null)
+            if (product != null)
             {
-                var descriptionEntity = await _descriptionRepository.CreateAsync(new ProductDescriptionEntity()
+                var manufacturerId = await _manufacturerService.GetManufacturerId(product.Manufacturer);
+                var parentCategoryId = await _categoryService.GetCategoryId(product.ParentCategory!);
+                object productCategoryId;
+
+                if (!string.IsNullOrEmpty(product.ParentCategory))
                 {
-                    Description = product.Description,
-                    Specifications = product.Description,
+                    productCategoryId = (int)await _categoryService.GetCategoryId(product.Category, (int)parentCategoryId);
+                }
+                else
+                {
+                    productCategoryId = (int)await _categoryService.GetCategoryId(product.Category);
+                }
+
+                var productEntity = await _productRepository.CreateAsync(new ProductEntity()
+                {
                     ArticleNumber = product.ArticleNumber,
-                    LanguageId = await _languageService.GetLanguageId(product.DescriptionLanguage)
+                    Title = product.Title,
+                    Price = product.Price,
+                    DiscountPrice = product.DiscountPrice,
+                    ManufacturerId = manufacturerId,
+                    ProductCategoryId = (int)productCategoryId,
                 });
 
-                if (descriptionEntity != null)
+                if (productEntity != null)
                 {
-                    return new ProductModel()
+                    var descriptionEntity = await _descriptionRepository.CreateAsync(new ProductDescriptionEntity()
                     {
-                        ArticleNumber = productEntity.ArticleNumber,
-                        Title = productEntity.Title,
-                        Manufacturer = productEntity.Manufacturer.Manufacturer,
-                        Price = productEntity.Price,
-                        DiscountPrice = productEntity.DiscountPrice,
-                        Category = await _categoryService.CreateCategory(new CategoryRegistrationModel(product.Category, product.ParentCategory!)),
-                        Descriptions = await _descriptionService.GetDescriptionsByProperty(x => x.ArticleNumber == productEntity.ArticleNumber),
-                        Reviews = await _reviewService.GetReviewsByProperty(x => x.ArticleNumber == productEntity.ArticleNumber),
-                    };
+                        Description = product.Description,
+                        Specifications = product.Specifications,
+                        ArticleNumber = product.ArticleNumber,
+                        LanguageId = await _languageService.GetLanguageId(product.DescriptionLanguage)
+                    });
+
+                    if (descriptionEntity != null)
+                    {
+                        return new ProductModel()
+                        {
+                            ArticleNumber = productEntity.ArticleNumber,
+                            Title = productEntity.Title,
+                            Manufacturer = productEntity.Manufacturer.Manufacturer,
+                            Price = productEntity.Price,
+                            DiscountPrice = productEntity.DiscountPrice,
+                            Category = new CategoryModel() { Category = product.Category, ParentCategory = product.ParentCategory! },
+                            Descriptions = await _descriptionService.GetDescriptionsByProperty(x => x.ArticleNumber == productEntity.ArticleNumber),
+                            Reviews = await _reviewService.GetReviewsByProperty(x => x.ArticleNumber == productEntity.ArticleNumber),
+                        };
+                    }
                 }
+                
             }
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
@@ -101,6 +119,21 @@ public class ProductService
 
                 if (entity != null)
                 {
+                    var category = await _categoryService.GetCategoryName(entity.ProductCategoryId);
+                    var parentCategory = "";
+
+                    if (entity.ProductCategory.ParentCategory != 0)
+                    {
+                        parentCategory = await _categoryService.GetParentCategoryName(entity.ProductCategoryId);
+                    }
+
+                    var categoryModel = new CategoryModel()
+                    {
+                        Id = entity.ProductCategoryId,
+                        Category = entity.ProductCategory.Category,
+                        ParentCategory = parentCategory
+                    };
+
                     return new ProductModel()
                     {
                         ArticleNumber = entity.ArticleNumber,
@@ -110,12 +143,7 @@ public class ProductService
                         DiscountPrice = entity.DiscountPrice,
                         Descriptions = await _descriptionService.GetDescriptionsByProperty(x => x.ArticleNumber == entity.ArticleNumber),
                         Reviews = await _reviewService.GetReviewsByProperty(x => x.ArticleNumber == entity.ArticleNumber),
-                        Category = new CategoryModel()
-                        {
-                            Id = entity.ProductCategoryId,
-                            Category = entity.ProductCategory.Category,
-                            ParentCategory = await _categoryService.GetCategoryName(entity.ProductCategory.ParentCategory)
-                        }
+                        Category = categoryModel
                     };
                 }
             }
@@ -130,26 +158,34 @@ public class ProductService
         try
         {
             List<ProductModel> productList = [];
-            var enttityList = await _productRepository.ReadAllAsync();
+            var entityList = await _productRepository.ReadAllAsync();
 
-            foreach (var entity in enttityList)
+            if (entityList != null)
             {
-                productList.Add(new ProductModel()
+                foreach (var entity in entityList)
                 {
-                    ArticleNumber = entity.ArticleNumber,
-                    Title = entity.Title,
-                    Manufacturer = entity.Manufacturer.Manufacturer,
-                    Price = entity.Price,
-                    DiscountPrice = entity.DiscountPrice,
-                    Descriptions = await _descriptionService.GetDescriptionsByProperty(x => x.ArticleNumber == entity.ArticleNumber),
-                    Reviews = await _reviewService.GetReviewsByProperty(x => x.ArticleNumber == entity.ArticleNumber),
-                    Category = new CategoryModel()
+                    var category = await _categoryService.GetCategoryName(entity.ProductCategoryId);
+                    var parentCategory = await _categoryService.GetParentCategoryName(entity.ProductCategoryId);
+
+                    var categoryModel = new CategoryModel()
                     {
                         Id = entity.ProductCategoryId,
                         Category = entity.ProductCategory.Category,
-                        ParentCategory = await _categoryService.GetCategoryName(entity.ProductCategory.ParentCategory)
-                    }
-                });
+                        ParentCategory = parentCategory
+                    };
+
+                    productList.Add(new ProductModel()
+                    {
+                        ArticleNumber = entity.ArticleNumber,
+                        Title = entity.Title,
+                        Manufacturer = entity.Manufacturer.Manufacturer,
+                        Price = entity.Price,
+                        DiscountPrice = entity.DiscountPrice,
+                        Descriptions = await _descriptionService.GetDescriptionsByProperty(x => x.ArticleNumber == entity.ArticleNumber),
+                        Reviews = await _reviewService.GetReviewsByProperty(x => x.ArticleNumber == entity.ArticleNumber),
+                        Category = categoryModel,
+                    });
+                }
             }
             return productList;
         }
@@ -170,8 +206,9 @@ public class ProductService
                 {
                     ArticleNumber = entityToUpdate.ArticleNumber,
                     Title = productUpdates.Title,
+                    Price = productUpdates.Price,
                     ManufacturerId = await _manufacturerService.GetManufacturerId(productUpdates.Category.Category),
-                    ProductCategoryId = await _categoryService.GetCategoryId(productUpdates.Category.Category)
+                    ProductCategoryId = (int)await _categoryService.GetCategoryId(productUpdates.Category.Category)
                 });
 
                 if (productUpdateResult != null && productUpdateResult is ProductEntity)

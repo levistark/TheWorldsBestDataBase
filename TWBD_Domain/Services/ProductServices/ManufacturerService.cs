@@ -15,7 +15,7 @@ public class ManufacturerService
     {
         try
         {
-            var manufacturerEntity = await _manufacturerRepository.ReadOneAsync(m => m.Manufacturer == manufacturer);
+            var manufacturerEntity = await _manufacturerRepository.ReadOneAsync(m => m.Manufacturer == manufacturer.ToLower());
 
             // Return existing manufacturer id
             if (manufacturerEntity != null)
@@ -24,14 +24,13 @@ public class ManufacturerService
             // Create new manufacturer if it does not exists
             else
             {
-                var newManufacturer = await _manufacturerRepository.CreateAsync(new ManufacturerEntity() { Manufacturer = manufacturer });
+                var newManufacturer = await _manufacturerRepository.CreateAsync(new ManufacturerEntity() { Manufacturer = manufacturer.ToLower() });
                 if (newManufacturer != null) return newManufacturer.Id;
             }
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return 0;
     }
-
     public async Task<string> GetManufacturerById(int id)
     {
         try
@@ -44,7 +43,6 @@ public class ManufacturerService
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     public async Task<IEnumerable<ManufacturerModel>> GetAllManufacturers()
     {
         try
@@ -60,7 +58,6 @@ public class ManufacturerService
         catch (Exception ex) { Debug.WriteLine(ex.Message);}
         return null!;
     }
-
     public async Task<ManufacturerModel> UpdateManufacturer(ManufacturerModel model)
     {
         try
@@ -81,7 +78,6 @@ public class ManufacturerService
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     public async Task<bool> DeleteManufacturerById(int id)
     {
         try

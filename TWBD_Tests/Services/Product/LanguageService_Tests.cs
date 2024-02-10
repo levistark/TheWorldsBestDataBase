@@ -20,6 +20,17 @@ public class LanguageService_Tests
         await _languageRepository.CreateAsync(new LanguageEntity() { Language = "Spanish" });
     }
 
+    //[Fact]
+    //public async Task CreateLanguageShould_AddNewLanguageToDb_ThenReturnAsModel()
+    //{
+    //    // Arrange
+    //    LanguageService _languageService = new LanguageService(_languageRepository);
+    //
+    //    // Act
+    //    // Assert
+    //
+    //}
+
     [Fact]
     public async Task GetLanguageIdByNameShould_FindLanguageId_ThenReturnIt()
     {
@@ -28,10 +39,12 @@ public class LanguageService_Tests
         AddSampleData();
 
         // Act
-        var result = await _languageService.GetLanguageId("English");
+        var result = await _languageService.GetLanguageId("German");
+        var name = await _languageService.GetLanguageName(result);
 
         // Assert
-        Assert.True(result == 1);
+        Assert.True(result > 0);
+        Assert.True(name == "German");
     }
 
     [Fact]

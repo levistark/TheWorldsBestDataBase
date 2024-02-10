@@ -13,6 +13,23 @@ public class LanguageRepository : ProductRepo<LanguageEntity>
         _productDataContext = productDataContext;
     }
 
+    // Create
+    public override async Task<LanguageEntity> CreateAsync(LanguageEntity entity)
+    {
+        try
+        {
+            var result = await _productDataContext.Languages.AddAsync(entity);
+            await _productDataContext.SaveChangesAsync();
+
+            if (result.Entity == entity)
+            {
+                return result.Entity;
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.StackTrace); }
+        return null!;
+    }
+
     public override async Task<IEnumerable<LanguageEntity>> ReadAllAsync()
     {
         try

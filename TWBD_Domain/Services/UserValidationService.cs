@@ -14,7 +14,7 @@ public class UserValidationService(AuthenticationRepository authenticationReposi
     {
         try
         {
-            var regex = new Regex(@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$");
+            var regex = new Regex(@"^(?=.*[\p{L}])(?=.*\d)(?=.*[@$!%*#?&])[\p{L}\d@$!%*#?&]{8,}$");
 
             // If password criteria not met:
             if (regex.IsMatch(password))
@@ -46,7 +46,6 @@ public class UserValidationService(AuthenticationRepository authenticationReposi
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return new ValidationResponse() { Code = ValidationCode.FAILED };
     }
-
     public ValidationResponse ValidateJustEmail(string email)
     {
         try
@@ -62,7 +61,6 @@ public class UserValidationService(AuthenticationRepository authenticationReposi
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return new ValidationResponse() { Code = ValidationCode.FAILED };
     }
-
     public ValidationResponse ValidateUpdatePassword(string newPassword, string oldPassword)
     {
         try

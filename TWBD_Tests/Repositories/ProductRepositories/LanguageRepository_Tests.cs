@@ -36,14 +36,15 @@ public class LanguageRepository_Tests
     public async Task CreateLanguageShould_CreateNewLanguage_ThenReturnIt()
     {
         // Arrange
-        var language = new LanguageEntity() { Language = "Svenska" };
+        var language = new LanguageEntity() { Language = "English" };
 
         // Act
         var result = await _languageRepository.CreateAsync(language);
 
         // Assert
         Assert.NotNull(result);
-        Assert.True(result.Language == "Svenska");
+        Assert.True(result.Language == "English");
+        Assert.True(result.Id > 0);
     }
 
     [Fact]

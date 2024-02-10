@@ -12,7 +12,38 @@ public class ReviewService
     {
         _reviewRepository = reviewRepository;
     }
+    public async Task<ReviewModel> CreateReview(ReviewModel review)
+    {
+        try
+        {
+            var reviews = await GetReviewsByProperty(x => x.ArticleNumber == review.ArticleNumber);
 
+            if (!reviews.Any(x => x.Author == review.Author))
+            {
+                var result = await _reviewRepository.CreateAsync(new ProductReviewEntity()
+                {
+                    Review = review.Review,
+                    Rating = review.Rating,
+                    Author = review.Author,
+                    ArticleNumber = review.ArticleNumber,
+                });
+
+                if (result != null!)
+                {
+                    return new ReviewModel()
+                    {
+                        Id = result.Id,
+                        Review = result.Review,
+                        Rating = result.Rating,
+                        Author = result.Author,
+                        ArticleNumber = result.ArticleNumber,
+                    };
+                }
+            }
+        }
+        catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        return null!;
+    }
     public async Task<List<ReviewModel>> GetAllReviews()
     {
         try
@@ -37,7 +68,6 @@ public class ReviewService
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     public async Task<List<ReviewModel>> GetReviewsByProperty(Func<ProductReviewEntity, bool> predicate)
     {
         try
@@ -46,21 +76,24 @@ public class ReviewService
 
             var entityList = await _reviewRepository.ReadAllAsync();
 
-            foreach (var entity in entityList)
+            if (entityList != null)
             {
-                if (predicate(entity))
+                foreach (var entity in entityList)
                 {
-                    reviewList.Add(new ReviewModel()
+                    if (predicate(entity))
                     {
-                        Id = entity.Id,
-                        Review = entity.Review,
-                        Rating = entity.Rating,
-                        Author = entity.Author,
-                        ArticleNumber = entity.ArticleNumber,
-                    });;
+                        reviewList.Add(new ReviewModel()
+                        {
+                            Id = entity.Id,
+                            Review = entity.Review,
+                            Rating = entity.Rating,
+                            Author = entity.Author,
+                            ArticleNumber = entity.ArticleNumber,
+                        }); ;
+                    }
                 }
+                return reviewList;
             }
-            return reviewList;
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;

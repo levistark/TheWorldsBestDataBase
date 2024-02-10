@@ -65,7 +65,8 @@ public partial class ProductDataContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
             entity.HasOne(d => d.ArticleNumberNavigation).WithMany(p => p.ProductDescriptions)
-                .OnDelete(DeleteBehavior.Cascade)
+            // Ändrat denna till att inte cascada
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ProductDe__Artic__7755B73D");
 
             entity.HasOne(d => d.Language).WithMany(p => p.ProductDescriptions)

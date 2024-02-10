@@ -29,7 +29,6 @@ public abstract class ProductRepo<TEntity> where TEntity : class
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     // Read 
     public virtual async Task<TEntity> ReadOneAsync(Expression<Func<TEntity, bool>> predicate)
     {
@@ -42,7 +41,6 @@ public abstract class ProductRepo<TEntity> where TEntity : class
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     public virtual async Task<IEnumerable<TEntity>> ReadAllAsync()
     {
         try
@@ -52,7 +50,6 @@ public abstract class ProductRepo<TEntity> where TEntity : class
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     // Update
     public virtual async Task<TEntity> UpdateAsync(Expression<Func<TEntity, bool>> expression, TEntity entity)
     {
@@ -70,7 +67,6 @@ public abstract class ProductRepo<TEntity> where TEntity : class
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
-
     // Delete
     public virtual async Task<bool> DeleteAsync(Expression<Func<TEntity, bool>> expression, TEntity entity)
     {
@@ -88,7 +84,6 @@ public abstract class ProductRepo<TEntity> where TEntity : class
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return false;
     }
-
     public virtual async Task<bool> Existing(Expression<Func<TEntity, bool>> expression)
     {
         try

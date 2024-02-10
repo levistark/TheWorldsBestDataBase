@@ -16,7 +16,7 @@ public class DescriptionService_Tests
     private readonly LanguageRepository _languageRepository = new(_productDataContext);
 
     [Fact]
-    public async Task AddSampleData()
+    public async Task<int> AddSampleData()
     {
         LanguageService _languageService = new LanguageService(_languageRepository);
 
@@ -72,6 +72,23 @@ public class DescriptionService_Tests
         Assert.Contains(descriptionList, x => x.ArticleNumber == "A1");
         Assert.Contains(descriptionList, x => x.ArticleNumber == "A2");
         Assert.True(descriptionList.Count() > 1);
+        return description1.Id;
+    }
+
+    [Fact]
+    public async Task GetDescriptionByIdShould_RetrieveDescription_TheReturnItAsModel()
+    {
+        // Arrange
+        LanguageService _languageService = new LanguageService(_languageRepository);
+        DescriptionService _descriptionService = new DescriptionService(_descriptionRepository, _languageService);
+        var id = await AddSampleData();
+
+        // Act
+        var result = await _descriptionService.GetDescriptionById(id);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.ArticleNumber == "A1");
     }
 
     [Fact]
